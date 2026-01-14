@@ -313,8 +313,7 @@ async function seed() {
           time: inProgressTime
         });
       } else {
-        // 40% "Done"
-        currentStatus = statusOptions['Done'];
+        // 40% "Done" (but some will be reopened if timestamps overlap)
         const toDoTime = createdDate;
         const inProgressTime = addHours(toDoTime, Math.random() * 4 + 0.5); // 0.5-4.5 hours later
         
@@ -325,21 +324,25 @@ async function seed() {
         
         const doneTime = addHours(toDoTime, resolutionHours);
         
-        statusHistory.push({
-          from: null,
-          to: statusOptions['To Do'],
-          time: toDoTime
-        });
-        statusHistory.push({
-          from: statusOptions['To Do'],
-          to: statusOptions['In Progress'],
-          time: inProgressTime
-        });
-        statusHistory.push({
-          from: statusOptions['In Progress'],
-          to: statusOptions['Done'],
-          time: doneTime
-        });
+        // Build transitions
+        const transitions = [
+          { to: statusOptions['To Do'], time: toDoTime },
+          { to: statusOptions['In Progress'], time: inProgressTime },
+          { to: statusOptions['Done'], time: doneTime }
+        ];
+        
+        // Sort by time to get chronological order
+        transitions.sort((a, b) => a.time - b.time);
+        
+        // Current status should be the LAST transition by time (not logical order)
+        currentStatus = transitions[transitions.length - 1].to;
+        
+        // Add from_status based on chronological order
+        statusHistory = transitions.map((transition, index) => ({
+          from: index === 0 ? null : transitions[index - 1].to,
+          to: transition.to,
+          time: transition.time
+        }));
       }
       
       // Insert status

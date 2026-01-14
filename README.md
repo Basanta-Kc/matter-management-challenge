@@ -6,7 +6,13 @@ Welcome! We're excited to see your approach to building a production-ready syste
 
 You'll be enhancing a **Matter Management System** - a tool for legal teams to track cases and matters. We've provided a working foundation, and you'll implement the missing features.
 
-**Time Estimate**: 4-8 hours  
+**Time Expectation**: We've designed this assessment to explore a realistically large problem space - intentionally more than can be completed in one sitting. We don't expect you to solve everything! We respect your time and ask that you spend approximately **4-8 hours** building features and exploring the codebase. What we're most interested in is:
+- Your approach to problem-solving and prioritization
+- The quality and thoughtfulness of what you do build
+- Your insights about the system, challenges you encountered, and trade-offs you considered
+- What you would do differently with more time
+
+Focus on showcasing your strengths rather than achieving completeness.  
 
 ---
 
