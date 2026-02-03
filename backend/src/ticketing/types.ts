@@ -62,6 +62,24 @@ export interface MatterListResponse {
   totalPages: number;
 }
 
+export interface MatterListItem {
+  id: string;
+  boardId: string;
+  fields: Record<string, string | number | boolean | null>;
+  resolutionTime?: string | null;
+  sla?: SLAStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MatterListResponseOptimized {
+  data: MatterListItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export interface Field {
   id: string;
   accountId: number;

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Matter, MatterListResponse } from '../types/matter';
+import { MatterListItem, MatterListResponseOptimized } from '../types/matter';
+import { useDebounce } from './useDebounce';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
 
@@ -12,11 +13,14 @@ interface UseMatterParams {
 }
 
 export function useMatters(params: UseMatterParams) {
-  const [data, setData] = useState<Matter[]>([]);
+  const [data, setData] = useState<MatterListItem[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Debounce search to avoid excessive API calls
+  const debouncedSearch = useDebounce(params.search, 300);
 
   const fetchMatters = useCallback(async () => {
     setLoading(true);
@@ -28,7 +32,7 @@ export function useMatters(params: UseMatterParams) {
         limit: params.limit.toString(),
         sortBy: params.sortBy,
         sortOrder: params.sortOrder,
-        search: params.search,
+        search: debouncedSearch,
       });
 
       const response = await fetch(`${API_URL}/matters?${queryParams}`);
@@ -37,7 +41,7 @@ export function useMatters(params: UseMatterParams) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const result: MatterListResponse = await response.json();
+      const result: MatterListResponseOptimized = await response.json();
       setData(result.data);
       setTotal(result.total);
       setTotalPages(result.totalPages);
@@ -47,7 +51,7 @@ export function useMatters(params: UseMatterParams) {
     } finally {
       setLoading(false);
     }
-  }, [params.page, params.limit, params.sortBy, params.sortOrder, params.search]);
+  }, [params.page, params.limit, params.sortBy, params.sortOrder, debouncedSearch]);
 
   useEffect(() => {
     fetchMatters();

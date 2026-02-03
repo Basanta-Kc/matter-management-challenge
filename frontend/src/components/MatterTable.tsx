@@ -1,19 +1,18 @@
-import { Matter, CurrencyValue } from '../types/matter';
-import {
-  formatCurrency,
-  formatDate,
-  formatBoolean,
-  getStatusBadgeColor,
-} from '../utils/formatting';
+import { MatterListItem } from '../types/matter';
+import { getStatusBadgeColor, getSLABadgeColor, formatDate } from '../utils/formatting';
 
 interface MatterTableProps {
-  matters: Matter[];
+  matters: MatterListItem[];
   sortBy: string;
   sortOrder: 'asc' | 'desc';
   onSort: (column: string) => void;
 }
 
+type FieldRenderer = (matter: MatterListItem) => JSX.Element;
+
 export function MatterTable({ matters, sortBy, sortOrder, onSort }: MatterTableProps) {
+  const NA = () => <span className="text-gray-400">N/A</span>;
+
   const renderSortIcon = (column: string) => {
     if (sortBy !== column) {
       return (
@@ -34,41 +33,74 @@ export function MatterTable({ matters, sortBy, sortOrder, onSort }: MatterTableP
     );
   };
 
-  const renderFieldValue = (matter: Matter, fieldName: string) => {
-    const field = matter.fields[fieldName];
-    if (!field) return <span className="text-gray-400">N/A</span>;
-
-    switch (field.fieldType) {
-      case 'currency':
-        return <span className="font-medium">{formatCurrency(field.value as CurrencyValue | null)}</span>;
-      
-      case 'date':
-        return <span>{formatDate(field.value as string | null)}</span>;
-      
-      case 'boolean':
-        return (
-          <span className={field.value ? 'text-green-600' : 'text-gray-400'}>
-            {formatBoolean(field.value as boolean | null)}
-          </span>
-        );
-      
-      case 'status':
-        return (
-          <span
-            className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeColor(
-              field.displayValue || ''
-            )}`}
-          >
-            {field.displayValue}
-          </span>
-        );
-      
-      case 'user':
-        return <span>{field.displayValue}</span>;
-      
-      default:
-        return <span>{field.displayValue || String(field.value) || 'N/A'}</span>;
-    }
+  // Field-specific renderers - clear, testable, maintainable
+  const fieldRenderers: Record<string, FieldRenderer> = {
+    subject: (matter) => (
+      <div className="text-sm font-medium text-gray-900">
+        {matter.fields.subject || <NA />}
+      </div>
+    ),
+    
+    'Case Number': (matter) => (
+      <span className="text-sm text-gray-500">
+        {matter.fields['Case Number'] || <NA />}
+      </span>
+    ),
+    
+    Status: (matter) => 
+      matter.fields.Status ? (
+        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeColor(String(matter.fields.Status))}`}>
+          {String(matter.fields.Status)}
+        </span>
+      ) : <NA />,
+    
+    'Assigned To': (matter) => (
+      <span className="text-sm text-gray-500">
+        {matter.fields['Assigned To'] || <NA />}
+      </span>
+    ),
+    
+    Priority: (matter) => (
+      <span className="text-sm text-gray-500">
+        {matter.fields.Priority || <NA />}
+      </span>
+    ),
+    
+    'Contract Value': (matter) => (
+      <span className="text-sm text-gray-500 font-medium">
+        {matter.fields['Contract Value'] || <NA />}
+      </span>
+    ),
+    
+    'Due Date': (matter) => (
+      <span className="text-sm text-gray-500">
+        {matter.fields['Due Date'] ? formatDate(String(matter.fields['Due Date'])) : <NA />}
+      </span>
+    ),
+    
+    Urgent: (matter) => 
+      matter.fields.Urgent ? (
+        <span className={String(matter.fields.Urgent) === '✓' ? 'text-green-600' : 'text-gray-400'}>
+          {String(matter.fields.Urgent)}
+        </span>
+      ) : <NA />,
+    
+    'Resolution Time': (matter) => (
+      <span className="text-sm text-gray-500">
+        {matter.resolutionTime || <NA />}
+      </span>
+    ),
+    
+    SLA: (matter) => 
+      matter.sla ? (
+        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getSLABadgeColor(matter.sla)}`}>
+          {matter.sla}
+        </span>
+      ) : (
+        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-500">
+          N/A
+        </span>
+      ),
   };
 
   if (matters.length === 0) {
@@ -107,34 +139,86 @@ export function MatterTable({ matters, sortBy, sortOrder, onSort }: MatterTableP
                 {renderSortIcon('subject')}
               </div>
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Case Number
+            <th
+              onClick={() => onSort('Case Number')}
+              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+            >
+              <div className="flex items-center gap-1">
+                Case Number
+                {renderSortIcon('Case Number')}
+              </div>
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Status
+            <th
+              onClick={() => onSort('Status')}
+              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+            >
+              <div className="flex items-center gap-1">
+                Status
+                {renderSortIcon('Status')}
+              </div>
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Assigned To
+            <th
+              onClick={() => onSort('Assigned To')}
+              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+            >
+              <div className="flex items-center gap-1">
+                Assigned To
+                {renderSortIcon('Assigned To')}
+              </div>
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Priority
+            <th
+              onClick={() => onSort('Priority')}
+              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+            >
+              <div className="flex items-center gap-1">
+                Priority
+                {renderSortIcon('Priority')}
+              </div>
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Contract Value
+            <th
+              onClick={() => onSort('Contract Value')}
+              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+            >
+              <div className="flex items-center gap-1">
+                Contract Value
+                {renderSortIcon('Contract Value')}
+              </div>
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Due Date
+            <th
+              onClick={() => onSort('Due Date')}
+              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+            >
+              <div className="flex items-center gap-1">
+                Due Date
+                {renderSortIcon('Due Date')}
+              </div>
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Urgent
+            <th
+              onClick={() => onSort('Urgent')}
+              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+            >
+              <div className="flex items-center gap-1">
+                Urgent
+                {renderSortIcon('Urgent')}
+              </div>
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Resolution Time
-              <span className="text-xs text-orange-600 ml-2">(TODO)</span>
+            <th
+              onClick={() => onSort('Resolution Time')}
+              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+            >
+              <div className="flex items-center gap-1">
+                Resolution Time
+                {renderSortIcon('Resolution Time')}
+              </div>
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              SLA
-              <span className="text-xs text-orange-600 ml-2">(TODO)</span>
+            <th
+              onClick={() => onSort('SLA')}
+              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+            >
+              <div className="flex items-center gap-1">
+                SLA
+                {renderSortIcon('SLA')}
+              </div>
             </th>
           </tr>
         </thead>
@@ -142,40 +226,34 @@ export function MatterTable({ matters, sortBy, sortOrder, onSort }: MatterTableP
           {matters.map((matter) => (
             <tr key={matter.id} className="hover:bg-gray-50">
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm font-medium text-gray-900">
-                  {renderFieldValue(matter, 'subject')}
-                </div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {renderFieldValue(matter, 'Case Number')}
+                {fieldRenderers.subject(matter)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                {renderFieldValue(matter, 'Status')}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {renderFieldValue(matter, 'Assigned To')}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {renderFieldValue(matter, 'Priority')}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {renderFieldValue(matter, 'Contract Value')}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {renderFieldValue(matter, 'Due Date')}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
-                {renderFieldValue(matter, 'Urgent')}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                {/* TODO: Display formatted resolution time (e.g., "2h 30m", "3d 5h") */}
-                <span className="italic">Not implemented</span>
+                {fieldRenderers['Case Number'](matter)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                {/* TODO: Display SLA badge (In Progress/Met/Breached) with appropriate colors */}
-                <span className="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-500 italic">
-                  Not implemented
-                </span>
+                {fieldRenderers.Status(matter)}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                {fieldRenderers['Assigned To'](matter)}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                {fieldRenderers.Priority(matter)}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                {fieldRenderers['Contract Value'](matter)}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                {fieldRenderers['Due Date'](matter)}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-center">
+                {fieldRenderers.Urgent(matter)}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                {fieldRenderers['Resolution Time'](matter)}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                {fieldRenderers.SLA(matter)}
               </td>
             </tr>
           ))}
