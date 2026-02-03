@@ -1,5 +1,5 @@
 import pool from '../../../db/pool.js';
-import { Matter, MatterListParams, FieldValue, UserValue, CurrencyValue, StatusValue, SLAStatus, CycleTime } from '../../types.js';
+import { Matter, MatterListParams, FieldValue, UserValue, CurrencyValue, StatusValue, SLAStatus, CycleTime, SortableField, SortOrder } from '../../types.js';
 import logger from '../../../utils/logger.js';
 import { config } from '../../../utils/config.js';
 import { PoolClient } from 'pg';
@@ -189,29 +189,29 @@ export class MatterRepo {
    */
   private async buildOrderByClause(
     client: PoolClient,
-    sortBy: string,
-    sortOrder: 'asc' | 'desc',
+    sortBy: SortableField,
+    sortOrder: SortOrder,
   ): Promise<{ orderByClause: string; joins: string[] }> {
     const sortOrderUpper = sortOrder.toUpperCase();
     const joins: string[] = [];
 
     // Handle built-in columns
-    if (sortBy === 'created_at') {
+    if (sortBy === SortableField.CreatedAt) {
       return { orderByClause: `tt.created_at ${sortOrderUpper}`, joins: [] };
     }
-    if (sortBy === 'updated_at') {
+    if (sortBy === SortableField.UpdatedAt) {
       return { orderByClause: `tt.updated_at ${sortOrderUpper}`, joins: [] };
     }
 
     // Handle Resolution Time and SLA
-    if (sortBy === 'Resolution Time') {
+    if (sortBy === SortableField.ResolutionTime) {
       return { 
         orderByClause: `(${this.getResolutionTimeSql()}) ${sortOrderUpper} NULLS LAST, tt.created_at ${sortOrderUpper}`, 
         joins: [] // No additional joins needed, main query handles them
       };
     }
     
-    if (sortBy === 'SLA') {
+    if (sortBy === SortableField.SLA) {
       const slaThresholdMs = config.SLA_THRESHOLD_HOURS * 60 * 60 * 1000;
       const slaStatusSubquery = `
         CASE 
@@ -492,7 +492,7 @@ export class MatterRepo {
    * - Batch fetches fields to minimize database round trips
    */
   async getMatters(params: MatterListParams) {
-    const { page = 1, limit = 25, sortBy = 'created_at', sortOrder = 'desc', search } = params;
+    const { page = 1, limit = 25, sortBy = SortableField.CreatedAt, sortOrder = 'desc', search } = params;
     const offset = (page - 1) * limit;
 
     const client = await pool.connect();

@@ -1,20 +1,8 @@
 import { z } from 'zod';
+import { SortableField } from '../types';
 
-// Valid sortable fields - must match what frontend sends
-const SORTABLE_FIELDS = [
-  'subject',
-  'Case Number',
-  'Status',
-  'Assigned To',
-  'Priority',
-  'Contract Value',
-  'Due Date',
-  'Urgent',
-  'Resolution Time',
-  'SLA',
-  'created_at',
-  'updated_at',
-] as const;
+// Extract enum values for Zod validation
+const SORTABLE_FIELD_VALUES = Object.values(SortableField) as [string, ...string[]];
 
 // Query schema for GET /matters
 export const getMattersQuerySchema = z.object({
@@ -29,11 +17,11 @@ export const getMattersQuerySchema = z.object({
     .transform((val) => (val ? parseInt(val, 10) : 25))
     .refine((val) => val > 0 && val <= 100, { message: 'Limit must be between 1 and 100' }),
   sortBy: z
-    .enum(SORTABLE_FIELDS, {
+    .enum(SORTABLE_FIELD_VALUES, {
       errorMap: () => ({ message: 'Invalid sort field' }),
     })
     .optional()
-    .default('created_at'),
+    .default(SortableField.CreatedAt),
   sortOrder: z.enum(['asc', 'desc'], {
     errorMap: () => ({ message: 'Sort order must be asc or desc' }),
   }).optional().default('desc'),

@@ -36,6 +36,24 @@ export interface StatusValue {
 
 export type FieldType = 'text' | 'number' | 'select' | 'date' | 'currency' | 'boolean' | 'status' | 'user';
 
+// Sortable fields enum - ensures type safety across frontend and backend
+export enum SortableField {
+  Subject = 'subject',
+  CaseNumber = 'Case Number',
+  Status = 'Status',
+  AssignedTo = 'Assigned To',
+  Priority = 'Priority',
+  ContractValue = 'Contract Value',
+  DueDate = 'Due Date',
+  Urgent = 'Urgent',
+  ResolutionTime = 'Resolution Time',
+  SLA = 'SLA',
+  CreatedAt = 'created_at',
+  UpdatedAt = 'updated_at',
+}
+
+export type SortOrder = 'asc' | 'desc';
+
 export interface CycleTime {
   resolutionTimeMs: number | null;
   resolutionTimeFormatted: string;
@@ -49,8 +67,8 @@ export type SLAStatus = 'In Progress' | 'Met' | 'Breached';
 export interface MatterListParams {
   page?: number;
   limit?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: SortableField;
+  sortOrder?: SortOrder;
   search?: string;
 }
 

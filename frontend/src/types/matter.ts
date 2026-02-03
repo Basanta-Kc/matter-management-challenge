@@ -46,6 +46,8 @@ export interface CycleTime {
 
 export type SLAStatus = 'In Progress' | 'Met' | 'Breached';
 
+export type SortOrder = 'asc' | 'desc';
+
 // Sortable field names - using enum for better type safety and autocomplete
 export enum SortableField {
   Subject = 'subject',
@@ -113,3 +115,13 @@ export interface StatusOption {
   sequence: number;
 }
 
+
+// API Error response type for better error handling
+export interface ApiError {
+  message: string;
+  status?: number;
+  errors?: Array<{
+    field: string;
+    message: string;
+  }>;
+}

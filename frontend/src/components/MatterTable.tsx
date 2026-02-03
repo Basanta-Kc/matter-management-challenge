@@ -1,10 +1,10 @@
-import { MatterListItem, SortableField } from '../types/matter';
+import { MatterListItem, SortableField, SortOrder } from '../types/matter';
 import { getStatusBadgeColor, getSLABadgeColor, formatDate } from '../utils/formatting';
 
 interface MatterTableProps {
   matters: MatterListItem[];
-  sortBy: string;
-  sortOrder: 'asc' | 'desc';
+  sortBy: SortableField;
+  sortOrder: SortOrder;
   onSort: (column: SortableField) => void;
 }
 
