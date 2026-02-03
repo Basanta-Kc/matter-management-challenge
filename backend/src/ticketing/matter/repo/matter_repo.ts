@@ -180,6 +180,17 @@ export class MatterRepo {
 
   /**
    * Build order by clause for field-based sorting
+   *    
+   * The challenge: We store different field types in different columns (number_value, 
+   * text_value, etc.), so sorting requires knowing which column to use.
+   * 
+   * The solution: We look up the field type, then build a custom JOIN and ORDER BY
+   * clause that targets the right column. We also handle NULLs gracefully by pushing
+   * them to the end with NULLS LAST.
+   * 
+   * Example: Sorting by "Case Number" (a number field) becomes:
+   *   LEFT JOIN ticketing_ticket_field_value ON ... field_id = 'abc-123'
+   *   ORDER BY number_value DESC NULLS LAST
    */
   private async buildOrderByClause(
     client: PoolClient,
@@ -330,6 +341,21 @@ export class MatterRepo {
 
   /**
    * Build search condition for WHERE clause
+   * 
+   * We need to search across ALL field types! 
+   * 
+   * The problem: A user might search for "John" (a user name), "1000" (a case number),
+   * or "Critical" (a priority). We don't know which field they're searching in.
+   * 
+   * The solution: We use EXISTS subqueries to check each field type separately:
+   * - Text fields: Check string_value and text_value with ILIKE (case-insensitive)
+   * - Number fields: Cast to text and search
+   * - User fields: Search first name, last name, and full name
+   * - Status/Select fields: Search the label (not the UUID)
+   * - Currency fields: Search the amount
+   * - SLA: Even search the SLA status!
+   * 
+   * All searches use parameterized queries ($1) to prevent SQL injection. 
    */
   private buildSearchCondition(
     search: string | undefined,
@@ -450,6 +476,25 @@ export class MatterRepo {
 
   /**
    * Get paginated list of matters with search and sorting
+   * 
+   * 
+   * What it does:
+   * 1. Takes user input (page, limit, sortBy, sortOrder, search)
+   * 2. Builds a dynamic SQL query based on those parameters
+   * 3. Fetches matters with cycle time and SLA data
+   * 4. Batch-fetches all fields to avoid N+1 queries
+   * 5. Returns paginated results with total count
+   * 
+   * The tricky parts:
+   * - Dynamic ORDER BY: Different field types need different sorting logic
+   * - Search across all fields: We check text, numbers, users, statuses, etc.
+   * - Cycle time calculation: Done in SQL for performance
+   * - NULL handling: Matters with missing fields still show up (NULLS LAST)
+   * 
+   * Performance notes:
+   * - Uses LEFT JOINs so matters without certain fields aren't excluded
+   * - Calculates resolution time and SLA in SQL (faster than doing it in code)
+   * - Batch fetches fields to minimize database round trips
    */
   async getMatters(params: MatterListParams) {
     const { page = 1, limit = 25, sortBy = 'created_at', sortOrder = 'desc', search } = params;
@@ -472,6 +517,9 @@ export class MatterRepo {
       const cycleTimeJoins = this.getCycleTimeJoins();
 
       // Calculate resolution time and SLA in SQL
+      // Why in SQL? Because calculating in code would mean fetching ALL matters first,
+      // then filtering/sorting in memory. That doesn't scale! By doing it in SQL,
+      // the database can use indexes and only return the page we need.
       const resolutionTimeMs = this.getResolutionTimeSql();
       const slaStatus = this.getSlaStatusSql();
 
