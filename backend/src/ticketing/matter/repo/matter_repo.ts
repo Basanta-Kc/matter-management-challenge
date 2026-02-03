@@ -468,14 +468,13 @@ export class MatterRepo {
       // Build order by clause with joins
       const { orderByClause, joins } = await this.buildOrderByClause(client, sortBy, sortOrder);
 
-      // Always add cycle time calculation joins for data retrieval
+      // Cycle time calculation joins for data retrieval
       const cycleTimeJoins = this.getCycleTimeJoins();
 
       // Calculate resolution time and SLA in SQL
       const resolutionTimeMs = this.getResolutionTimeSql();
       const slaStatus = this.getSlaStatusSql();
 
-      // Get total count
       const countQuery = `
         SELECT COUNT(DISTINCT tt.id) as total
         FROM ticketing_ticket tt

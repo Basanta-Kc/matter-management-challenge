@@ -12,7 +12,6 @@ import {
 
 export const matterRouter = Router();
 
-// Matter endpoints with validation middleware
 matterRouter.get(
   '/matters',
   validate({ query: getMattersQuerySchema }),
