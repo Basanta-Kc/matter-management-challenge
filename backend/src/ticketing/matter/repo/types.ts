@@ -30,7 +30,7 @@ export interface MatterQueryRow {
  */
 export interface FieldInfoRow {
   id: string;
-  field_type: string;
+  field_type: 'text' | 'number' | 'select' | 'date' | 'currency' | 'boolean' | 'status' | 'user';
 }
 
 /**
@@ -61,7 +61,7 @@ export interface FieldValueRow {
   id: string;
   ticket_field_id: string;
   field_name: string;
-  field_type: string;
+  field_type: 'text' | 'number' | 'select' | 'date' | 'currency' | 'boolean' | 'status' | 'user';
   // Value columns (one per field type)
   text_value: string | null;
   string_value: string | null;
@@ -73,11 +73,11 @@ export interface FieldValueRow {
   select_reference_value_uuid: string | null;
   status_reference_value_uuid: string | null;
   // Joined display data
-  user_id: number | null;
-  user_email: string | null;
-  user_first_name: string | null;
-  user_last_name: string | null;
-  select_option_label: string | null;
-  status_option_label: string | null;
-  status_group_name: string | null;
+  user_id: number;
+  user_email: string ;
+  user_first_name: string;
+  user_last_name: string;
+  select_option_label: string;
+  status_option_label: string;
+  status_group_name: string;
 }

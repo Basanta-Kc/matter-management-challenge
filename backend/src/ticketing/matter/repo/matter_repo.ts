@@ -621,7 +621,7 @@ export class MatterRepo {
       return {};
     }
 
-    const fieldsResult = await client.query(
+    const fieldsResult = await client.query<FieldValueRow>(
       `SELECT 
         ttfv.ticket_id,
         ttfv.id,
