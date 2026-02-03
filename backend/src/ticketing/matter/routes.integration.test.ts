@@ -275,7 +275,8 @@ describe('GET /api/v1/matters - Integration Tests', () => {
         expect(matter).toHaveProperty('fields');
         // Null values should be allowed in fields
         Object.values(matter.fields).forEach((value) => {
-          expect([null, 'string', 'number', 'boolean', 'object']).toContain(typeof value === null ? null : typeof value);
+          const valueType = value === null ? 'null' : typeof value;
+          expect(['null', 'string', 'number', 'boolean', 'object']).toContain(valueType);
         });
       });
     });

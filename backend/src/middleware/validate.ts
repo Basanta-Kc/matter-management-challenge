@@ -2,8 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import { z, ZodSchema } from 'zod';
 import logger from '../utils/logger.js';
 
-type ValidationTarget = 'body' | 'query' | 'params';
-
 interface ValidationSchemas {
   body?: ZodSchema;
   query?: ZodSchema;
