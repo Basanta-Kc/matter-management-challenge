@@ -68,6 +68,7 @@ export class MatterService {
       statusGroupName = (statusField.value as StatusValue).groupName || null;
     }
 
+    
     const { cycleTime, sla } = (await this.cycleTimeService.calculateCycleTimesAndSLA(
       [
         {

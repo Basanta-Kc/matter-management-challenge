@@ -24,7 +24,7 @@ export function errorHandler(
   err: Error,
   req: Request,
   res: Response,
-  next: NextFunction,
+  _: NextFunction,
 ): void {
   // Log error
   logger.error('Error occurred', {
