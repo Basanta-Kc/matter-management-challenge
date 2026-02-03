@@ -3,11 +3,15 @@ import { Matter, MatterListParams, FieldValue, UserValue, CurrencyValue, StatusV
 import logger from '../../../utils/logger.js';
 import { config } from '../../../utils/config.js';
 import { PoolClient } from 'pg';
+import type {
+  MatterQueryRow,
+  FieldInfoRow,
+  CountRow,
+  MatterBasicRow,
+  FieldValueRow,
+} from './types.js';
 
 export class MatterRepo {
-  // Cache for field IDs by field name
-  private fieldIdCache: Map<string, { id: string; fieldType: string }> = new Map();
-
   /**
    * Format duration in milliseconds to human-readable format
    */
@@ -148,15 +152,10 @@ export class MatterRepo {
     };
   }
   /**
-   * Get field ID and type by field name (with caching)
+   * Get field ID and type by field name
    */
   private async getFieldInfo(client: PoolClient, fieldName: string): Promise<{ id: string; fieldType: string } | null> {
-    // Check cache first
-    if (this.fieldIdCache.has(fieldName)) {
-      return this.fieldIdCache.get(fieldName)!;
-    }
-
-    const result = await client.query(
+    const result = await client.query<FieldInfoRow>(
       `SELECT id, field_type 
        FROM ticketing_fields 
        WHERE name = $1 AND deleted_at IS NULL 
@@ -168,14 +167,10 @@ export class MatterRepo {
       return null;
     }
 
-    const fieldInfo = {
+    return {
       id: result.rows[0].id,
       fieldType: result.rows[0].field_type,
     };
-
-    // Cache the result
-    this.fieldIdCache.set(fieldName, fieldInfo);
-    return fieldInfo;
   }
 
   /**
@@ -531,7 +526,7 @@ export class MatterRepo {
         WHERE 1=1 ${searchCondition}
       `;
       
-      const countResult = await client.query(countQuery, queryParams);
+      const countResult = await client.query<CountRow>(countQuery, queryParams);
       const total = parseInt(countResult.rows[0].total);
 
       // Get matters
@@ -555,7 +550,7 @@ export class MatterRepo {
       `;
       
       queryParams.push(limit, offset);
-      const mattersResult = await client.query(mattersQuery, queryParams);
+      const mattersResult = await client.query<MatterQueryRow>(mattersQuery, queryParams);
 
       // Batch fetch all fields for all matters to avoid N+1 queries
       const matterIds = mattersResult.rows.map((row) => row.id);
@@ -592,7 +587,7 @@ export class MatterRepo {
     const client = await pool.connect();
 
     try {
-      const matterResult = await client.query(
+      const matterResult = await client.query<MatterBasicRow>(
         `SELECT id, board_id, created_at, updated_at
          FROM ticketing_ticket
          WHERE id = $1`,
