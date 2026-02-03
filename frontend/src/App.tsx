@@ -3,11 +3,12 @@ import { useMatters } from './hooks/useMatters';
 import { MatterTable } from './components/MatterTable';
 import { Pagination } from './components/Pagination';
 import { SearchBar } from './components/SearchBar';
+import { SortableField } from './types/matter';
 
 function App() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(25);
-  const [sortBy, setSortBy] = useState('created_at');
+  const [sortBy, setSortBy] = useState<SortableField>(SortableField.CreatedAt);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [search, setSearch] = useState('');
 
@@ -19,7 +20,7 @@ function App() {
     search,
   });
 
-  const handleSort = (column: string) => {
+  const handleSort = (column: SortableField) => {
     if (sortBy === column) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {

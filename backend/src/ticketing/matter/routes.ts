@@ -3,13 +3,36 @@ import { getMatters } from './handlers/getMatters.js';
 import { getMatterDetails } from './handlers/getMatterDetails.js';
 import { updateMatter } from './handlers/updateMatter.js';
 import { getFields } from './handlers/getFields.js';
+import { validate } from '../../middleware/validate.js';
+import {
+  getMattersQuerySchema,
+  matterIdParamsSchema,
+  updateMatterBodySchema,
+} from './validation.js';
 
 export const matterRouter = Router();
 
-// Matter endpoints
-matterRouter.get('/matters', getMatters);
-matterRouter.get('/matters/:id', getMatterDetails);
-matterRouter.patch('/matters/:id', updateMatter);
+// Matter endpoints with validation middleware
+matterRouter.get(
+  '/matters',
+  validate({ query: getMattersQuerySchema }),
+  getMatters
+);
+
+matterRouter.get(
+  '/matters/:id',
+  validate({ params: matterIdParamsSchema }),
+  getMatterDetails
+);
+
+matterRouter.patch(
+  '/matters/:id',
+  validate({
+    params: matterIdParamsSchema,
+    body: updateMatterBodySchema,
+  }),
+  updateMatter
+);
 
 // Fields endpoint
 matterRouter.get('/fields', getFields);

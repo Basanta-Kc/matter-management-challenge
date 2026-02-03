@@ -46,6 +46,22 @@ export interface CycleTime {
 
 export type SLAStatus = 'In Progress' | 'Met' | 'Breached';
 
+// Sortable field names - using enum for better type safety and autocomplete
+export enum SortableField {
+  Subject = 'subject',
+  CaseNumber = 'Case Number',
+  Status = 'Status',
+  AssignedTo = 'Assigned To',
+  Priority = 'Priority',
+  ContractValue = 'Contract Value',
+  DueDate = 'Due Date',
+  Urgent = 'Urgent',
+  ResolutionTime = 'Resolution Time',
+  SLA = 'SLA',
+  CreatedAt = 'created_at',
+  UpdatedAt = 'updated_at',
+}
+
 export interface MatterListResponse {
   data: Matter[];
   total: number;

@@ -6,11 +6,6 @@ export async function getMatterDetails(req: Request, res: Response): Promise<voi
   try {
     const { id } = req.params;
 
-    if (!id) {
-      res.status(400).json({ error: 'Matter ID is required' });
-      return;
-    }
-
     const matterService = new MatterService();
     const matter = await matterService.getMatterById(id);
 

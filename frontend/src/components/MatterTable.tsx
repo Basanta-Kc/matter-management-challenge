@@ -1,11 +1,11 @@
-import { MatterListItem } from '../types/matter';
+import { MatterListItem, SortableField } from '../types/matter';
 import { getStatusBadgeColor, getSLABadgeColor, formatDate } from '../utils/formatting';
 
 interface MatterTableProps {
   matters: MatterListItem[];
   sortBy: string;
   sortOrder: 'asc' | 'desc';
-  onSort: (column: string) => void;
+  onSort: (column: SortableField) => void;
 }
 
 type FieldRenderer = (matter: MatterListItem) => JSX.Element;
@@ -13,7 +13,7 @@ type FieldRenderer = (matter: MatterListItem) => JSX.Element;
 export function MatterTable({ matters, sortBy, sortOrder, onSort }: MatterTableProps) {
   const NA = () => <span className="text-gray-400">N/A</span>;
 
-  const renderSortIcon = (column: string) => {
+  const renderSortIcon = (column: SortableField) => {
     if (sortBy !== column) {
       return (
         <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -131,93 +131,93 @@ export function MatterTable({ matters, sortBy, sortOrder, onSort }: MatterTableP
         <thead className="bg-gray-50">
           <tr>
             <th
-              onClick={() => onSort('subject')}
+              onClick={() => onSort(SortableField.Subject)}
               className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
             >
               <div className="flex items-center gap-1">
                 Subject
-                {renderSortIcon('subject')}
+                {renderSortIcon(SortableField.Subject)}
               </div>
             </th>
             <th
-              onClick={() => onSort('Case Number')}
+              onClick={() => onSort(SortableField.CaseNumber)}
               className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
             >
               <div className="flex items-center gap-1">
                 Case Number
-                {renderSortIcon('Case Number')}
+                {renderSortIcon(SortableField.CaseNumber)}
               </div>
             </th>
             <th
-              onClick={() => onSort('Status')}
+              onClick={() => onSort(SortableField.Status)}
               className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
             >
               <div className="flex items-center gap-1">
                 Status
-                {renderSortIcon('Status')}
+                {renderSortIcon(SortableField.Status)}
               </div>
             </th>
             <th
-              onClick={() => onSort('Assigned To')}
+              onClick={() => onSort(SortableField.AssignedTo)}
               className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
             >
               <div className="flex items-center gap-1">
                 Assigned To
-                {renderSortIcon('Assigned To')}
+                {renderSortIcon(SortableField.AssignedTo)}
               </div>
             </th>
             <th
-              onClick={() => onSort('Priority')}
+              onClick={() => onSort(SortableField.Priority)}
               className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
             >
               <div className="flex items-center gap-1">
                 Priority
-                {renderSortIcon('Priority')}
+                {renderSortIcon(SortableField.Priority)}
               </div>
             </th>
             <th
-              onClick={() => onSort('Contract Value')}
+              onClick={() => onSort(SortableField.ContractValue)}
               className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
             >
               <div className="flex items-center gap-1">
                 Contract Value
-                {renderSortIcon('Contract Value')}
+                {renderSortIcon(SortableField.ContractValue)}
               </div>
             </th>
             <th
-              onClick={() => onSort('Due Date')}
+              onClick={() => onSort(SortableField.DueDate)}
               className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
             >
               <div className="flex items-center gap-1">
                 Due Date
-                {renderSortIcon('Due Date')}
+                {renderSortIcon(SortableField.DueDate)}
               </div>
             </th>
             <th
-              onClick={() => onSort('Urgent')}
+              onClick={() => onSort(SortableField.Urgent)}
               className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
             >
               <div className="flex items-center gap-1">
                 Urgent
-                {renderSortIcon('Urgent')}
+                {renderSortIcon(SortableField.Urgent)}
               </div>
             </th>
             <th
-              onClick={() => onSort('Resolution Time')}
+              onClick={() => onSort(SortableField.ResolutionTime)}
               className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
             >
               <div className="flex items-center gap-1">
                 Resolution Time
-                {renderSortIcon('Resolution Time')}
+                {renderSortIcon(SortableField.ResolutionTime)}
               </div>
             </th>
             <th
-              onClick={() => onSort('SLA')}
+              onClick={() => onSort(SortableField.SLA)}
               className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
             >
               <div className="flex items-center gap-1">
                 SLA
-                {renderSortIcon('SLA')}
+                {renderSortIcon(SortableField.SLA)}
               </div>
             </th>
           </tr>
