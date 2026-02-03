@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { SortableField } from '../types';
+import { SortableField } from '../types.js';
 
 // Extract enum values for Zod validation
 const SORTABLE_FIELD_VALUES = Object.values(SortableField) as [string, ...string[]];
